@@ -1,19 +1,20 @@
 # ScoreSearch
 Search for scores by instrumentation - HAMR2018 project
 
-### Summary
+## Summary
 You and 2 friends team up to form a new band. You play the piano and your friends play bassoon and bagpipe. Who the hell wrote music for that combo? 
 
-Well, surely someone modernist composer in some country did at some time, but currently it's virtually impossible to find. Libraries generally record composer names, piece titles, even the physical size and the number of pages of the actual book very well. They rarely put the same effort in the instrumentation, and if they do, their software rarely allows to search it properly.
+Well, surely someone unknown composer in some country wrote something once, but it's virtually impossible to find. Libraries generally record composer names, piece titles, even the physical size and the number of pages of the actual book very well. They rarely put the same effort in the instrumentation, and if they do, their software rarely allows to search it properly.
 
-Therefore this project that I've been willing to do for years: a search engine for sheet music by instrumentation. Currently only as a mock-up, worked out at the HAMR hackathon in Paris, September 2018.
+Hence this project that I've been willing to do for years: a search engine for sheet music by instrumentation. Currently only as a mock-up, worked out at the HAMR hackathon in Paris, September 2018.
 
-### In this repo
+## In this repo
 A few scripts to get it done:
-* cleaning the data
-* converting it to the format we'll use in our database
-* moving the data into the database
-* launching the frontend / search form
+* `preprocess_rism.ipynb` : clean the RISM dataset and convert it to JSON files focusing on instrumentation
+* `import_in_elk.ipynb` : import the resulting JSON into an ELK stack (i.e. ElasticSearch)
+* TODO: script to launch the frontend / search form. (I'm counting on Kibana)
+
+## Background
 
 ### The data
 There are few large-scale repositories of bibliographic data readily available online. Most only offer limited access through an API, hardly useful to create a new index. Worldcat unfortunately does not share their data.
@@ -35,7 +36,9 @@ There exists no internationally agreed upon list or taxonomy of musical instrume
 
 Note that most of these are also heavily biased towards the Western musical tradition.
 
-Lacking a generally accepted standard sufficient in scope and depth, many libraries improvised their own systems for instrumentation catalography - see http://visiepc16.cde.ua.ac.be/varia/IAML2015_JG.pdf for an example. Add to that the unfortunate fact that library catalographers rarely have the necessary (musical) skills to properly encode instrumentation. Obviously, this screws up all interchangeability. Instrumentation catalography being complicated, it's also expensive to migrate to another system.
+Lacking a generally accepted standard sufficient in scope and depth, many libraries improvised their own systems for instrumentation catalography - see http://visiepc16.cde.ua.ac.be/varia/IAML2015_JG.pdf for an example. Add to that the unfortunate fact that catalographers rarely have the necessary (musical) skills to properly encode instrumentation. Obviously, this screws up all interchangeability. Instrumentation catalography being complicated, it's also expensive to migrate to another system.
+
+## Pipeline
 
 ### Data cleansing
 The most important data in RISM are:
@@ -50,17 +53,45 @@ Extracting the used vocabulary in fields 240 and 594 from RISM gives list of ins
 * "pf 4hands (clav 4hands)"
 * "vl (fl 2)"
 
-Needless to say, instrumentation is recorded in this database in a very ad hoc manner, often not following any standard, or having used any form of input verification. RISM is a composite collection of data compiled from many libraries, of which few fully comply to international standards of catalography. 
+Needless to say, instrumentation is recorded in this database in a very ad hoc manner, often not following any standard, nor having used any form of input verification. RISM is a composite collection of data compiled from many libraries, of which few fully comply to international standards of catalography. 
 
 To somewhat clean this up, we remove invalid characters (\[\]?\*+\& etc) and impose that:
 * instruments must appear at least 5 times (configurable)
 * instrument names must be maximum 20 characters (configurable)
 
 ### Format Conversion
-Directly to JSON for moving into Elastic, or rather to structured ASCII for use with LogStash?
+All is converted into one .json file containing an array of JSON objects, each of the form:
+```
+{
+  'id': '000051654', 
+  'instr_summ': ['S', 'strings'], 
+  'instr_full': ['S', 'vl (2)', 'vla', 'b']
+}
+```
 
 ### Database
-Inverted index, should be something Lucene can do, so: ElasticSearch / ELK stack. Probably easiest on Docker?
+This is basically an inverted index, which is apparently something that Lucene is good at. The ELK stack sounds (from what I've heard) like a solution that should be suitbale for these kind of problems. In this project, we locally use the Docker image: https://elk-docker.readthedocs.io/ . 
+Make sure to increase the RAM available to Docker if necessary - 4GB is needed at least.
+
+To install for the first time, open a terminal and run: 
+`sudo docker run -p 5601:5601 -p 9200:9200 -p 5044:5044 -it --name elk sebp/elk`
+
+If already installed, open a terminal and run:
+`sudo docker start elk`
 
 ### Front-end
-Kibana to begin with? Should be possible to make a form in it, at least their demo has one.
+Since we installed an ELK stack, it's probably best to use Kibana - go to: http://localhost:5601 in the browser. 
+I'll probably follow the tutorial at https://www.elastic.co/guide/en/kibana/6.4/tutorial-build-dashboard.html to create a dashboard that includes a search form.
+
+## TODO
+* Better cleanup of the data. We probably want to convert all cryptic acronyms into full-text instrument names, but this will be a long mapping to define
+* Better exception handling in the code, e.g. when files are already imported in the DB, the index already exists, etc.
+* Split up the code and files better in different functions with easily changeable parameters
+* Frontend definition in Kibana
+* Undoubtedly forgot a few special cases
+* Long term: find a way to separate the number of instruments from the instrument names themselves
+
+## To think about
+* What does the number of instruments actually mean: the number of performers, or the actual number of instruments needed? How is piano 4handed different from 2 pianos? What with an orchestra where the piccolo and flute are played by the same person?
+* Exclusive search should probably be a tickbox in the search form: music for piano, violin and cello automatically includes piano concertos since orchestras have violins and cellos, and this is likely not always what we want.
+* Adding more databases. E.g. is the IMSLP data accessible? And where to find modern composers?
