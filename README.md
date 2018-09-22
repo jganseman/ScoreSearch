@@ -1,5 +1,6 @@
 # ScoreSearch
 Search for scores by instrumentation - HAMR2018 project
+Find the latest version of this project at https://github.com/jganseman/ScoreSearch
 
 ## Summary
 You and 2 friends team up to form a new band. You play the piano and your friends play bassoon and bagpipe. Who the hell wrote music for that combo? 
