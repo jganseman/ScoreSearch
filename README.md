@@ -18,7 +18,7 @@ A few scripts to get it done:
 ### The data
 There are few large-scale repositories of bibliographic data readily available online. Most only offer limited access through an API, hardly useful to create a new index. Worldcat unfortunately does not share their data.
 
-We start out with the RISM dataset, containing approximately 1 million bibliographic records and author data, of works published up until approximately 1850. Their data is kindly downloadable for free in MarcXML format from https://opac.rism.info/index.php?id=8&L=1 . If anybody knows about other datasets, do let it know, e.g. through a pull request!
+We start out with the RISM dataset, containing approximately 1 million bibliographic records and author data, of music written or published up until approximately 1850. Their data is kindly downloadable for free in MarcXML format from https://opac.rism.info/index.php?id=8&L=1 . If anybody knows about other datasets, do let it know, e.g. through a pull request!
 
 The MARC21 and MarcXML formats are standard formats for bibliographic data, of which the (very complicated) definition can be found at the Library of Congress: http://www.loc.gov/standards/marcxml/
 
