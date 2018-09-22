@@ -4,7 +4,7 @@ Search for scores by instrumentation - HAMR2018 project
 ### Summary
 You and 2 friends team up to form a new band. You play the piano and your friends play bassoon and bagpipe. Who the hell wrote music for that combo? 
 
-Well, surely someone did, but currently it's virtually impossible to find. Libraries generally record composer names, piece titles, even the physical size and the number of pages of the actual book very well. They rarely put the same effort in the instrumentation, and if they do, their software rarely allows to search it properly.
+Well, surely someone modernist composer in some country did at some time, but currently it's virtually impossible to find. Libraries generally record composer names, piece titles, even the physical size and the number of pages of the actual book very well. They rarely put the same effort in the instrumentation, and if they do, their software rarely allows to search it properly.
 
 Therefore this project that I've been willing to do for years: a search engine for sheet music by instrumentation. Currently only as a mock-up, worked out at the HAMR hackathon in Paris, September 2018.
 
@@ -43,16 +43,18 @@ The most important data in RISM are:
 * field 240m: a (standardized? To be confirmed...) summary of the instrumentation (e.g.: 1 piano plus strings)
 * field 594a: a complete instrumentation (e.g.: 1 piano, 2 violins, 1 viola, 1 cello)
 
-Extracting the used vocabulary in fields 240 and 594 from RISM gives list of instruments that includes:
-* bla
-* bla
-* bla
+Extracting the used vocabulary in fields 240 and 594 from RISM gives list of instruments that includes things such as:
+* "3. (3. auch Picc.)"
+* "5-6). - Bühnenmusik Org."
+* "Kast. grRatsche - 2 Hfe."
+* "pf 4hands (clav 4hands)"
+* "vl (fl 2)"
 
-RISM is a collection of data gathered from many libraries that rarely comply to international standards of catalography, making the instrumentation data an utter mess. 
+Needless to say, instrumentation is recorded in this database in a very ad hoc manner, often not following any standard, or having used any form of input verification. RISM is a composite collection of data compiled from many libraries, of which few fully comply to international standards of catalography. 
 
-To somewhat clean this up, we remove invalid characters (\[\]?\*\& etc) and impose that:
-* instruments must appear at least 5 times 
-* instrument names must be maximum 20 characters
+To somewhat clean this up, we remove invalid characters (\[\]?\*+\& etc) and impose that:
+* instruments must appear at least 5 times (configurable)
+* instrument names must be maximum 20 characters (configurable)
 
 ### Format Conversion
 Directly to JSON for moving into Elastic, or rather to structured ASCII for use with LogStash?
